@@ -1,1 +1,6 @@
+# Ignore all files inside s3_logs/
+s3_logs/*
+
+# But keep the placeholder file
+!s3_logs/.keep
 
