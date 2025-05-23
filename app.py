@@ -6,10 +6,7 @@ from datetime import datetime
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-# Inside any script (whether in Website/ or SOC/)
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))  # Gets SOC/
-DB_PATH = os.path.join(BASE_DIR, 'cloudtrail_logs.db')
-PROCESSED_LOGS_FILE = os.path.join(BASE_DIR, 'processed_files.txt')
+DB_PATH = os.path.join(os.path.dirname(__file__), 'cloudtrail_logs.db')
 print("🔍 Using DB at:", DB_PATH)
 
 def format_timestamp(timestamp):
