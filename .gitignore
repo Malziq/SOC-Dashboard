@@ -1,0 +1,2 @@
+s3_logs/*
+!s3_logs/.keep
