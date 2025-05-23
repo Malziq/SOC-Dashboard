@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOC Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <meta http-equiv="refresh" content="30">
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen">
+        <nav class="bg-white shadow-lg">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold">SOC</span>
+                        </div>
+                        <span class="text-xl font-semibold text-gray-800">Dashboard</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2 text-sm text-gray-600">
+                            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                            <span>Live Updates</span>
+                        </div>
+                        <div class="text-sm text-gray-500">Auto-refresh: 30s</div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-100">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500 truncate">Total Alerts</dt>
+                        <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ summary.total_alerts }}</dd>
+                    </div>
+                </div>
+                <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-100">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500 truncate">High Severity</dt>
+                        <dd class="mt-1 text-3xl font-semibold text-red-600">{{ summary.high_severity }}</dd>
+                        {% if summary.high_severity > 0 %}
+                        <p class="text-sm text-red-500 mt-1">Requires immediate attention</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-100">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500 truncate">Medium Severity</dt>
+                        <dd class="mt-1 text-3xl font-semibold text-yellow-600">{{ summary.medium_severity }}</dd>
+                    </div>
+                </div>
+                <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-100">
+                    <div class="px-4 py-5 sm:p-6">
+                        <dt class="text-sm font-medium text-gray-500 truncate">Low Severity</dt>
+                        <dd class="mt-1 text-3xl font-semibold text-blue-600">{{ summary.low_severity }}</dd>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Sections -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- High Frequency API Usage -->
+                <div class="bg-white shadow-sm rounded-xl border border-gray-100">
+                    <div class="px-4 py-5 border-b border-gray-100 sm:px-6 flex justify-between items-center">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">High-Frequency API Usage</h3>
+                        {% if high_freq %}
+                        <span class="px-2.5 py-0.5 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                            {{ high_freq|length }} detected
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="px-4 py-5 sm:p-6 space-y-4">
+                        {% for alert in high_freq %}
+                        <div class="p-4 border border-yellow-200 rounded-lg bg-yellow-50 hover:bg-yellow-100 transition-colors duration-200">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium text-yellow-900">{{ alert.event_name }}</span>
+                                <span class="px-2 py-1 rounded-full text-sm bg-yellow-200 text-yellow-800">{{ alert.count }} calls</span>
+                            </div>
+                            <div class="mt-2 text-sm text-yellow-800">IP: {{ alert.ip_address }}</div>
+                        </div>
+                        {% endfor %}
+                        {% if not high_freq %}
+                        <div class="text-center py-4">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-3">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-500">No high-frequency API usage detected</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- IAM Activity -->
+                <div class="bg-white shadow-sm rounded-xl border border-gray-100">
+                    <div class="px-4 py-5 border-b border-gray-100 sm:px-6 flex justify-between items-center">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">IAM Activity</h3>
+                        {% if iam_activity %}
+                        <span class="px-2.5 py-0.5 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                            {{ iam_activity|length }} events
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="px-4 py-5 sm:p-6 space-y-4">
+                        {% for alert in iam_activity %}
+                        <div class="p-4 border border-red-200 rounded-lg bg-red-50 hover:bg-red-100 transition-colors duration-200">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium text-red-900">{{ alert.event_name }}</span>
+                                <time class="text-sm text-red-800">{{ alert.event_time }}</time>
+                            </div>
+                            <div class="mt-2 text-sm text-red-800">IP: {{ alert.ip_address }}</div>
+                        </div>
+                        {% endfor %}
+                        {% if not iam_activity %}
+                        <div class="text-center py-4">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-3">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-500">No IAM activity detected</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Unusual Regions -->
+                <div class="bg-white shadow-sm rounded-xl border border-gray-100">
+                    <div class="px-4 py-5 border-b border-gray-100 sm:px-6 flex justify-between items-center">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Unusual Regions</h3>
+                        {% if unusual_regions %}
+                        <span class="px-2.5 py-0.5 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                            {{ unusual_regions|length }} regions
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="px-4 py-5 sm:p-6 space-y-4">
+                        {% for region in unusual_regions %}
+                        <div class="p-4 border border-red-200 rounded-lg bg-red-50 hover:bg-red-100 transition-colors duration-200">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"></path>
+                                </svg>
+                                <span class="font-medium text-red-900">{{ region.region }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if not unusual_regions %}
+                        <div class="text-center py-4">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-3">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-500">No unusual region activity detected</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Off-Hours Activity -->
+                <div class="bg-white shadow-sm rounded-xl border border-gray-100">
+                    <div class="px-4 py-5 border-b border-gray-100 sm:px-6 flex justify-between items-center">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Off-Hours Activity</h3>
+                        {% if off_hours %}
+                        <span class="px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            {{ off_hours|length }} events
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="px-4 py-5 sm:p-6 space-y-4">
+                        {% for alert in off_hours %}
+                        <div class="p-4 border border-blue-200 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors duration-200">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium text-blue-900">{{ alert.event_name }}</span>
+                                <time class="text-sm text-blue-800">{{ alert.event_time }}</time>
+                            </div>
+                            <div class="mt-2 text-sm text-blue-800">IP: {{ alert.ip_address }}</div>
+                        </div>
+                        {% endfor %}
+                        {% if not off_hours %}
+                        <div class="text-center py-4">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-3">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <p class="text-gray-500">No off-hours activity detected</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
